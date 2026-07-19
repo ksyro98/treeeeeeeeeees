@@ -162,8 +162,7 @@ view model =
                 model.trees
             )
         , div [ class "h-full flex flex-col justify-end items-end" ]
-            [
-              div [ class "w-[100%] flex flex-row justify-center" ]
+            [ div [ class "w-[100%] flex flex-row justify-center" ]
                 [ button
                     [ onClick PressedGetTree
                     , class "px-24 py-4 bg-button active:bg-button-pressed border-8 border-button-border rounded-3xl text-2xl text-text-white z-40"
@@ -207,14 +206,16 @@ view model =
         ]
 
 
-numberOfTrees : Int
-numberOfTrees =
-    5
-
-
 getTree : Int -> String
 getTree id =
-    "tree-" ++ toString (modBy numberOfTrees id) ++ ".png"
+    let
+        options =
+            [ 0, 0, 0, 1, 1, 2, 2, 3, 3, 4 ]
+
+        t =
+            List.drop (modBy 10 id) options |> List.head |> Maybe.withDefault 0
+    in
+    "tree-" ++ toString t ++ ".png"
 
 
 encodePortMsg : PortMsg -> String
