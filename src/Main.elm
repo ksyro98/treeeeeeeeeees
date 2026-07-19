@@ -140,7 +140,8 @@ view model =
     div [ class "p-8 w-full h-screen bg-background overflow-hidden" ]
         [ span
             [ id "sprite"
-            , class "fixed bottom-8 left-8 text-3xl z-10 pointer-events-none"
+            , class "fixed top-8 right-8 text-3xl z-1 cursor-pointer"
+            , onClick SignalPressed
             ]
             [ text "🐱" ]
         , Keyed.node "div"
@@ -160,15 +161,9 @@ view model =
                 )
                 model.trees
             )
-        , div [ class "h-full flex flex-col justify-between items-end" ]
-            [ div
-                []
-                [ button
-                    [ onClick SignalPressed
-                    ]
-                    [ text "Signal" ]
-                ]
-            , div [ class "w-[100%] flex flex-row justify-center" ]
+        , div [ class "h-full flex flex-col justify-end items-end" ]
+            [
+              div [ class "w-[100%] flex flex-row justify-center" ]
                 [ button
                     [ onClick PressedGetTree
                     , class "px-24 py-4 bg-button active:bg-button-pressed border-8 border-button-border rounded-3xl text-2xl text-text-white z-40"
