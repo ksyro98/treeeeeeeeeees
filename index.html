@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <title>Elm App</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'button': 'var(--button)',
+            'button-pressed': 'var(--button-pressed)',
+            'button-border': 'var(--button-border)',
+            'background': 'var(--background)',
+            'tree-brown': 'var(--tree-brown)',
+            'text-white': 'var(--text-white)',
+          },
+        },
+      },
+    }
+  </script>
+  <link rel="stylesheet" href="style.css" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Yuyu&display=swap" rel="stylesheet">
+</head>
+
+<body style="width: 100vw; height: 100vh;">
+  <div id="treeStore" can-play style="display: none;"></div>
+  <div id="app"></div>
+  <script src="elm.js"></script>
+
+  <script type="module">
+    import { playhtml } from "https://unpkg.com/playhtml@latest";
+
+    var app = Elm.Main.init({ node: document.getElementById("app") });
+
+    // initialize playhtml can-play data
+    const el = document.getElementById('treeStore');
+    let setDataFn = null;
+    let setAwarenessFn = null;
+
+    el.defaultData = { trees: [] };
+    el.myDefaultAwareness = {};
+
+    el.onMount = ({ setMyAwareness }) => {
+      setAwarenessFn = setMyAwareness;
+    };
+
+    el.updateElement = ({ element, data, setData }) => {
+      console.log('ghost');
+
+      setDataFn = setData;
+      app.ports.fromJs.send(JSON.stringify({
+        id: 'fetchTrees',
+        direction: 'fromJs',
+        data: data.trees,
+      }));
+    }
+
+    el.updateElementAwareness = ({ element, awareness }) => {
+      const latest = awareness.find(a => a && a.signaledTreeId);
+      if (latest) {
+        animateSprite(latest.signaledTreeId);
+      }
+    }
+
+    app.ports.toJs.subscribe(function (messageStr) {
+      const message = JSON.parse(messageStr);
+      if (message.id === "addTree" && setDataFn) {
+        setDataFn((d) => {
+          d.trees.push({ id: message.data.treeId });
+        });
+      } else if (message.id === "addMessage" && setDataFn) {
+        setDataFn((d) => {
+          const tree = d.trees.find(t => t.id === message.data.treeId);
+          if (tree) {
+            if (!tree.messages) tree.messages = [];
+            tree.messages.push(message.data.message);
+          }
+        });
+      } else if (message.id === "signalMessage") {
+        animateSprite(message.treeId);
+        if (setAwarenessFn) {
+          setAwarenessFn({ signaledTreeId: message.treeId });
+        }
+      }
+    });
+
+    const sprite = document.getElementById('sprite');
+    let spriteAnimating = false;
+
+    function animateSprite(treeId) {
+      if (spriteAnimating) return;
+      const treeEl = document.getElementById(String(treeId));
+      if (!treeEl) return;
+
+      spriteAnimating = true;
+      const spriteRect = sprite.getBoundingClientRect();
+      const treeRect = treeEl.getBoundingClientRect();
+
+      const dx = treeRect.left + treeRect.width / 2 - spriteRect.left - spriteRect.width / 2;
+      const dy = treeRect.top + treeRect.height / 2 - spriteRect.top - spriteRect.height / 2;
+
+      const hops = 4;
+      const goFrames = [];
+      for (let i = 0; i <= hops; i++) {
+        const t = i / hops;
+        const x = dx * t;
+        const y = dy * t;
+        const bounce = (i < hops) ? Math.sin(t * Math.PI) * -40 : 0;
+        goFrames.push({ transform: `translate(${x}px, ${y + bounce}px)` });
+      }
+
+      const goAnimation = sprite.animate(goFrames, {
+        duration: 800, easing: 'ease-in-out', fill: 'forwards',
+      });
+
+      goAnimation.onfinish = () => {
+        const returnFrames = [];
+        for (let i = 0; i <= hops; i++) {
+          const t = i / hops;
+          const x = dx * (1 - t);
+          const y = dy * (1 - t);
+          const bounce = (i < hops) ? Math.sin(t * Math.PI) * -40 : 0;
+          returnFrames.push({ transform: `translate(${x}px, ${y + bounce}px)` });
+        }
+
+        const returnAnimation = sprite.animate(returnFrames, {
+          duration: 800, easing: 'ease-in-out', fill: 'forwards',
+        });
+
+        returnAnimation.onfinish = () => {
+          spriteAnimating = false;
+        };
+      };
+    }
+
+    // playhtml initialization
+    playhtml.init({
+      cursors: {
+        enabled: true,
+        room: "page"
+      },
+    });
+
+    // // setting up newly created playtml elements
+    const playAttrs = ["can-move", "can-spin", "can-toggle", "can-grow", "can-duplicate", "can-hover", "can-mirror", "can-play"];
+
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        for (const node of mutation.addedNodes) {
+          if (node.nodeType !== 1) continue;
+          if (playAttrs.some(attr => node.hasAttribute(attr))) {
+            setTimeout(() => {
+              playhtml.setupPlayElement(node);
+            }, 1000);
+          }
+        }
+      }
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+
+  </script>
+</body>
+
+</html>

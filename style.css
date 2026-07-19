@@ -1,0 +1,81 @@
+html, body {
+    overflow-x: hidden;
+}
+
+:root {
+    --background: #c0f4b5;
+    --button: #60410e;
+    --button-pressed: #4c330c;
+    --button-border: #c69341;
+    --tree-brown: #7D5516;
+    --text-white: #f9edd9;
+}
+
+@keyframes tree-loading {
+    0% {
+        transform: scale(0);
+    }
+
+    70% {
+        transform: scale(1);
+    }
+
+    80% {
+        transform: rotate(5deg);
+    }
+
+    90% {
+        transform: rotate(-5deg);
+    }
+
+    100% {
+        transform: rotate(0deg);
+    }
+}
+
+.tree-loading {
+    animation: tree-loading 1s ease-out;
+}
+
+@keyframes slide-in {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.modal {
+    animation: slide-in 0.3s ease-out;
+}
+
+@keyframes tree-signaling {
+
+    0%,
+    100% {
+        transform: rotate(0deg);
+    }
+
+    25% {
+        transform: rotate(5deg);
+    }
+
+    75% {
+        transform: rotate(-5deg);
+    }
+}
+
+.tree-signaling {
+    animation: tree-signaling 0.2s ease-out 3;
+    animation-composition: add;
+}
+
+.yuyu-regular {
+  font-family: "Yuyu", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
