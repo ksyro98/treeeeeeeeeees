@@ -5,7 +5,6 @@ port module Main exposing (main)
 
 import Browser
 import Browser.Dom
-import Debug exposing (toString)
 import Html exposing (Html, button, div, form, img, input, li, span, text, ul)
 import Html.Attributes exposing (attribute, class, id, placeholder, src, value)
 import Html.Events exposing (onClick, onDoubleClick, onInput, onSubmit)
@@ -220,7 +219,7 @@ getTree id =
         t =
             List.drop (modBy 10 id) options |> List.head |> Maybe.withDefault 0
     in
-    "tree-" ++ toString t ++ ".png"
+    "tree-" ++ String.fromInt t ++ ".png"
 
 
 encodePortMsg : PortMsg -> String
