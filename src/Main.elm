@@ -143,7 +143,12 @@ view model =
             , class "fixed top-8 right-8 text-3xl z-1 cursor-pointer"
             , onClick SignalPressed
             ]
-            [ text "🐱" ]
+            [ img
+                [ class "w-32"
+                , src "assets/cat.png"
+                ]
+                []
+            ]
         , Keyed.node "div"
             []
             (List.map
